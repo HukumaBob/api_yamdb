@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 
 
 class User(AbstractUser):
@@ -20,7 +20,7 @@ class User(AbstractUser):
     )
 
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class Category(models.Model):
@@ -35,9 +35,9 @@ class Title(models.Model):
     pass
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     pass
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     pass
