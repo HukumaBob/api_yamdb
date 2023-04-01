@@ -43,6 +43,7 @@ class User(AbstractUser):
             return True
         else:
             return False
+
     @property
     def is_user(self):
         if self.role == self.ROLE_CHOICES['user']:
@@ -68,6 +69,10 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    pass
+
+
+class TitleGenre(models.Model):
     pass
 
 
