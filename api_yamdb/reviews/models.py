@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
+from reviews.validators import (validate_year)
 
 
 class User(AbstractUser):
@@ -69,7 +70,44 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    pass
+    '''Произведения'''
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text='Название произведения')
+    genre = models.ManyToManyField(
+        Genre,
+        related_name='titles',
+        verbose_name='Жанры',
+        help_text='Жанры произведения'
+    )
+    category = models.ForeignKey(
+        Category,
+        blank=False,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        verbose_name='Категория',
+        help_text='Категория произведения',
+    )
+    description = models.TextField(
+        max_length=510,
+        blank=True,
+        verbose_name='Описание',
+        help_text='Описание произведения'
+    )
+    year = models.IntegerField(
+        verbose_name='Год выхода',
+        help_text='Год выхода произведения',
+        validators=[validate_year]
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.text
 
 
 class TitleGenre(models.Model):
