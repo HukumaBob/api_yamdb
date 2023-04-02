@@ -82,3 +82,10 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+## Management-команда, добавляющая данные в БД через Django ORM
+
+- В папке с файлом manage.py выполнить команду:
+```
+python manage.py convert_csv
+```
