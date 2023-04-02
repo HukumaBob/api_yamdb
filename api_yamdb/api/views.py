@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminRole
+from .permissions import IsAdminPermission
 from .serializer import UserSerializer, SignUpSerializer, TokenSerializer
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
@@ -20,7 +20,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=username',)
     pagination_class = PageNumberPagination
-    permission_classes = [IsAdminRole]
+    permission_classes = [IsAdminPermission]
     lookup_field = 'username'
 
     @action(
