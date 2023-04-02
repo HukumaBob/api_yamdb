@@ -2,7 +2,7 @@ from csv import DictReader
 from django.core.management.base import BaseCommand, CommandError
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
-ALREDY_LOADED_ERROR_MESSAGE = """
+ALREADY_LOADED_ERROR_MESSAGE = """
 If you need to reload the child data from the CSV file,
 first delete the db.sqlite3 file to destroy the database.
 Then, run `python manage.py migrate` for a new empty
@@ -18,7 +18,7 @@ class Command(BaseCommand):
         # Show this if the data already exist in the database
         if User.objects.exists():
             print('user data already loaded...exiting.')
-            print(ALREDY_LOADED_ERROR_MESSAGE)
+            print(ALREADY_LOADED_ERROR_MESSAGE)
             return
 
         # Show this before loading the data into the database

@@ -2,12 +2,12 @@ from django.contrib.auth.models import Permission
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminPermission
+from .permissions import IsAdminRole
 from .serializer import UserSerializer, SignUpSerializer, TokenSerializer
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
@@ -20,8 +20,24 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('=username',)
     pagination_class = PageNumberPagination
-    permission_classes = [IsAdminPermission]
+    permission_classes = [IsAdminRole]
     lookup_field = 'username'
+
+    @action(
+        methods=['GET', 'PATCH'],
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        url_path='me')
+    def change_me(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(
+                request.user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def confirmation_code_to_email(username):
