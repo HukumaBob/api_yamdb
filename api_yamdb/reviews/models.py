@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
-from reviews.validators import (validate_year)
+from .validators import (validate_year)
 
 
 class User(AbstractUser):
@@ -62,11 +62,44 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    pass
+    '''Категории произведений (книги, фильмы, музыка и т.п)'''
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название категории',
+        help_text='Категория произведений'
+    )
+    slug = models.SlugField(
+        unique=True, max_length=50,
+        verbose_name='Slug',
+        help_text='Категория произведений'
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
 
 
 class Genre(models.Model):
-    pass
+    '''Жанры произведений'''
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название жанра',
+        help_text='Жанр произведения')
+    slug = models.SlugField(
+        max_length=50,
+        help_text='Жанр произведения',
+        verbose_name='Slug'
+    )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):

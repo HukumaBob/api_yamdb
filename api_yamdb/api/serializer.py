@@ -25,3 +25,15 @@ class SignUpSerializer(serializers.ModelSerializer):
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=50)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['name', 'slug']
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['name', 'slug']
+        model = Genre

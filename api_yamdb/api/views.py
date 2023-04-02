@@ -6,9 +6,12 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminRole
-from .serializer import UserSerializer, SignUpSerializer, TokenSerializer
+from .permissions import IsAdminRole, IsAdminOrReadOnly
+from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
+                         GenreSerializer, CategorySerializer)
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
 import uuid
@@ -100,12 +103,26 @@ def get_token(request):
     )
 
 
+class CommonCreateListDestroyViewset(
+    CreateModelMixin,
+    ListModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
 class CommentViewSet(viewsets.ModelViewSet):
     pass
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    pass
+class GenreViewSet(CommonCreateListDestroyViewset):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = [filters.SearchFilter]
+    permission_classes = [IsAdminOrReadOnly, ]
+    search_fields = ['=name', ]
+    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -116,5 +133,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     pass
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    pass
+class CategoryViewSet(CommonCreateListDestroyViewset):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly, ]
+    search_fields = ['=name', ]
+    lookup_field = 'slug'
