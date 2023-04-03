@@ -7,8 +7,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminRole
-from .serializer import UserSerializer, SignUpSerializer, TokenSerializer
+from .permissions import IsAdminRole, IsAuthorOrStuff
+from .serializer import UserSerializer, SignUpSerializer, TokenSerializer, ReviewSerializer, CommentSerializer
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
 import uuid
@@ -101,7 +101,19 @@ def get_token(request):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    pass
+    serializer_class = CommentSerializer
+    permission_classes = (IsAuthorOrStuff,)
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        serializer.save(author=self.request.user, review=review)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -109,7 +121,19 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    pass
+    serializer_class = ReviewSerializer
+    permission_classes = (IsAuthorOrStuff,)
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(author=self.request.user, title=title)
 
 
 class TitleViewSet(viewsets.ModelViewSet):

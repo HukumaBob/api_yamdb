@@ -77,8 +77,59 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    pass
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Title'
+    )
+    text = models.TextField(
+        verbose_name='Text'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Author'
+    )
+    score = models.IntegerField(
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(10)],
+        verbose_name='Score'
+    )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        db_index=True,
+        verbose_name='Add date'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title_id', 'author'],
+                name='review_only_once'
+            )
+        ]
 
 
 class Comment(models.Model):
-    pass
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Review'
+    )
+    text = models.TextField(
+        verbose_name='Text'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Author'
+    )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        db_index=True,
+        verbose_name='Add date'
+    )
