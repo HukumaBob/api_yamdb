@@ -39,7 +39,7 @@ class IsAuthorOrModeratorPermission(permissions.BasePermission):
         )
 
 
-class IsAuthorOrStuff(permissions.BasePermission):
+class IsAuthorOrModerator(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return (
@@ -48,8 +48,6 @@ class IsAuthorOrStuff(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
         return (
                 request.method in permissions.SAFE_METHODS
                 or obj.author == request.user

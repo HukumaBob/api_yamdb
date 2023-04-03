@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminRole, IsAuthorOrStuff
+from .permissions import IsAdminRole, IsAuthorOrModerator
 from .serializer import UserSerializer, SignUpSerializer, TokenSerializer, ReviewSerializer, CommentSerializer
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
@@ -102,7 +102,7 @@ def get_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrStuff,)
+    permission_classes = (IsAuthorOrModerator,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -122,7 +122,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrStuff,)
+    permission_classes = (IsAuthorOrModerator,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
