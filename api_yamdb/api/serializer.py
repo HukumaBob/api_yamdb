@@ -37,3 +37,29 @@ class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['name', 'slug']
         model = Genre
+
+
+class TitleGetSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.FloatField(source='reviews__score__avg',
+                                    read_only=True)
+
+    class Meta:
+        fields = ['id', 'name', 'genre', 'year',
+                  'description', 'rating', 'category']
+        model = Title
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         many=True,
+                                         queryset=Genre.objects.all(),
+                                         )
+    category = serializers.SlugRelatedField(slug_field='slug',
+                                            queryset=Category.objects.all(),
+                                            )
+
+    class Meta:
+        fields = '__all__'
+        model = Title

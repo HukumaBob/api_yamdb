@@ -1,17 +1,22 @@
+from django.db.models import Avg
 from django.contrib.auth.models import Permission
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
 from rest_framework import filters, status, viewsets
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet,
+                                           CharFilter)
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
+from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from .permissions import IsAdminRole, IsAdminOrReadOnly
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
-                         GenreSerializer, CategorySerializer)
+                         GenreSerializer, CategorySerializer,
+                         TitleGetSerializer, TitlePostSerializer)
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
 import uuid
@@ -129,8 +134,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pass
 
 
+class TitleFilter(FilterSet):
+    category = CharFilter(field_name='category__slug')
+    genre = CharFilter(field_name='genre__slug')
+
+    class Meta:
+        model = Title
+        fields = ['genre', 'category', 'name', 'year']
+
+
 class TitleViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
+    permission_classes = [IsAdminOrReadOnly, ]
+    pagination_class = LimitOffsetPagination
+    # http_method_names = ['get', 'post', 'path', 'delete']
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return [TitlePostSerializer]
+        return [TitleGetSerializer]
 
 
 class CategoryViewSet(CommonCreateListDestroyViewset):
