@@ -20,23 +20,68 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class TitleAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'name',
+        'year',
+        'category',
+        'description'
+    )
+    empty_value_display = 'no value'
+    search_fields = ('name',)
+    list_filter = ('category',)
+    empty_value_display = '-empty-'
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'pk',
+        'name',
+        'slug'
+    )
+    empty_value_display = 'no value'
+    list_filter = ('name',)
+    search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 class GenreAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'pk',
+        'name',
+        'slug'
+    )
+    empty_value_display = 'no value'
+    list_filter = ('name',)
+    search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 class ReviewAdmin(admin.ModelAdmin):
-    pass
+    class ReviewAdmin(admin.ModelAdmin):
+        list_display = (
+            'pk',
+            'author',
+            'text',
+            'score',
+            'pub_date',
+            'title'
+        )
+        empty_value_display = 'no value'
+        list_filter = ('author', 'score', 'pub_date')
+        search_fields = ('author',)
 
 
 class CommentAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        'pk',
+        'author',
+        'text',
+        'pub_date',
+        'review'
+    )
+    empty_value_display = 'no value'
+    list_filter = ('author', 'pub_date')
+    search_fields = ('author',)
 
 
 admin.site.register(User, UserAdmin)
