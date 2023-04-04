@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import (MaxValueValidator, MinValueValidator,
@@ -6,10 +7,13 @@ from .validators import validate_year
 
 
 class User(AbstractUser):
+    ROLE_USER = 'user'
+    ROLE_MODERATOR = 'moderator'
+    ROLE_ADMIN = 'admin'
     ROLE_CHOICES = (
-        ('user', 'User'),
-        ('moderator', 'Moderator'),
-        ('admin', 'Admin'),
+        (ROLE_USER, 'User'),
+        (ROLE_MODERATOR, 'Moderator'),
+        (ROLE_ADMIN, 'Admin'),
     )
     VALIDATOR = RegexValidator(r'^[\w.@+-]+\Z')
     username = models.CharField(
@@ -25,7 +29,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
-        default='user',
+        default=ROLE_USER,
     )
     bio = models.TextField(
         'Description',
@@ -38,20 +42,6 @@ class User(AbstractUser):
         default='00000000'
     )
 
-    @property
-    def is_moderator(self):
-        if self.role == self.ROLE_CHOICES['moderator']:
-            return True
-        else:
-            return False
-
-    @property
-    def is_user(self):
-        if self.role == self.ROLE_CHOICES['user']:
-            return True
-        else:
-            return False
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -59,7 +49,28 @@ class User(AbstractUser):
                 name='unique_username_email'
             )
         ]
+    @property
+    def is_moderator(self):
+        if self.role == self.ROLE_MODERATOR:
+            return True
+        else:
+            return False
 
+    @property
+    def is_user(self):
+        if self.role == self.ROLE_USER:
+            return True
+        else:
+            return False
+
+    @property
+    def is_admin(self):
+        if self.role == self.ROLE_ADMIN:
+            return True
+        else:
+            return False
+
+User = get_user_model()
 
 class Category(models.Model):
     '''Категории произведений (книги, фильмы, музыка и т.п)'''
