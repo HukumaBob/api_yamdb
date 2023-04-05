@@ -1,6 +1,7 @@
 
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import (FilterSet,
                                            CharFilter)
 from rest_framework import filters, status, viewsets
@@ -159,6 +160,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminRole | ReadOnly,)
+    filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -170,6 +172,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(CommonCreateListDestroyViewset):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = [filters.SearchFilter]
     permission_classes = [IsAdminOrReadOnly, ]
     search_fields = ['=name', ]
     lookup_field = 'slug'
@@ -178,7 +181,7 @@ class CategoryViewSet(CommonCreateListDestroyViewset):
 class GenreViewSet(CommonCreateListDestroyViewset):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = [filters.SearchFilter]
-    permission_classes = [IsAdminOrReadOnly, ]
     search_fields = ['=name', ]
     lookup_field = 'slug'
+    filter_backends = [filters.SearchFilter]
+    permission_classes = [IsAdminOrReadOnly, ]
