@@ -70,7 +70,9 @@ class User(AbstractUser):
         else:
             return False
 
+
 User = get_user_model()
+
 
 class Category(models.Model):
     '''Категории произведений (книги, фильмы, музыка и т.п)'''
@@ -100,7 +102,7 @@ class Genre(models.Model):
         verbose_name='Название жанра',
         help_text='Жанр произведения')
     slug = models.SlugField(
-        max_length=50,
+        unique=True, max_length=50,
         help_text='Жанр произведения',
         verbose_name='Slug'
     )

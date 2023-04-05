@@ -83,6 +83,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id ', 'text', 'author', 'pub_date')
         model = Comment
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['name', 'slug']
