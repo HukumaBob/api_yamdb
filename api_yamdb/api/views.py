@@ -10,10 +10,10 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminPermission, IsAuthorOrStuff, IsAdminOrReadOnly, IsAdminRole, ReadOnly
+from .permissions import IsAdminOrStuffPermission, IsAuthorOrStuff, IsAdminOrReadOnly, IsAdminRole, ReadOnly
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
                          ReviewSerializer, CommentSerializer, GenreSerializer,
-                         CategorySerializer, TitleSerializer, TitleCreateSerializer)
+                         CategorySerializer, TitleSerializer, TitleCreateSerializer, UserWithoutRoleSerializer)
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
 import uuid
@@ -25,8 +25,9 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ['username', ]
     pagination_class = PageNumberPagination
-    permission_classes = [IsAdminPermission]
+    permission_classes = [IsAdminOrStuffPermission]
     lookup_field = 'username'
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['GET', 'PATCH'],
@@ -36,7 +37,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def change_me(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
-            serializer = UserSerializer(
+            serializer = UserWithoutRoleSerializer(
                 request.user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)

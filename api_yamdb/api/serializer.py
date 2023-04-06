@@ -20,6 +20,20 @@ class UserSerializer(serializers.ModelSerializer):
                 'Incorrect username')
         return username
 
+class UserWithoutRoleSerializer(serializers.ModelSerializer):
+    role = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
+
+    def validate(self, username):
+        if username == 'me':
+            raise serializers.ValidationError(
+                'Incorrect username')
+        return username
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
