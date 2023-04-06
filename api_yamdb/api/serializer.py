@@ -20,8 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
                 'Incorrect username')
         return username
 
+
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
     role = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -34,6 +36,7 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Incorrect username')
         return username
+
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
@@ -128,7 +131,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         current_year = timezone.now().year
         if not 0 <= value <= current_year:
             raise serializers.ValidationError(
-                'Проверьте год создания произведения (должен быть нашей эры).'
+                'Check the year of birth, it must be in our era!.'
             )
         return value
 
