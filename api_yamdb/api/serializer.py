@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'username', 'email', 'first_name',
-            'last_name', 'bio', 'role', 'confirmation_code',
+            'last_name', 'bio', 'role',
         )
 
     def validate(self, username):

@@ -33,3 +33,27 @@ class Command(BaseCommand):
                 last_name=row['last_name']
             )
             user.save()
+
+
+class Title(BaseCommand):
+    # Show this when the user types help
+    help = "Loads data from user.csv"
+
+    def handle(self, *args, **options):
+
+        # Show this if the data already exist in the database
+        if Title.objects.exists():
+            print('title data already loaded...exiting.')
+            print(ALREADY_LOADED_ERROR_MESSAGE)
+            return
+
+        # Show this before loading the data into the database
+        print("Loading title data")
+
+        # Code to load the data into database
+        for row in DictReader(open('./static/data/titles.csv')):
+            user = User(
+                id=row['id'], name=row['name'],
+                year=row['year'], category=row['category']
+            )
+            user.save()
