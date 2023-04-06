@@ -1,4 +1,3 @@
-
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,7 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('=username',)
+    search_fields = ['username', ]
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminPermission]
     lookup_field = 'username'
