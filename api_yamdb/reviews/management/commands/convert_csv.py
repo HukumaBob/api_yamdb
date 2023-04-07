@@ -4,7 +4,8 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 ALREADY_LOADED_ERROR_MESSAGE = """
 If you need to reload the child data from the CSV file,
-first delete the db.sqlite3 file to destroy the database.
+first delete the db.sqlite3 file to destroy the database
+(f.e.  run `python manage.py flush`).
 Then, run `python manage.py migrate` for a new empty
 database with tables"""
 
