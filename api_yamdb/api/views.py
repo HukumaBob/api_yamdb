@@ -11,7 +11,7 @@ from rest_framework.pagination import (PageNumberPagination,
                                        LimitOffsetPagination)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title, User
 from .permissions import (IsAdminOrStuffPermission, IsAuthorOrStuff,
                           IsAdminOrReadOnly, IsAdminRole, ReadOnly)
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
