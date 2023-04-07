@@ -162,6 +162,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminRole | ReadOnly,)
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
+    pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
@@ -176,6 +177,7 @@ class CategoryViewSet(CommonCreateListDestroyViewset):
     permission_classes = [IsAdminOrReadOnly, ]
     search_fields = ['=name', ]
     lookup_field = 'slug'
+    pagination_class = LimitOffsetPagination
 
 
 class GenreViewSet(CommonCreateListDestroyViewset):
@@ -185,3 +187,4 @@ class GenreViewSet(CommonCreateListDestroyViewset):
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     permission_classes = [IsAdminOrReadOnly, ]
+    pagination_class = LimitOffsetPagination

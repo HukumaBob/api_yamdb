@@ -49,6 +49,7 @@ class User(AbstractUser):
                 name='unique_username_email'
             )
         ]
+
     @property
     def is_moderator(self):
         if self.role == self.ROLE_MODERATOR:
@@ -75,57 +76,57 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    '''Категории произведений (книги, фильмы, музыка и т.п)'''
+    '''Categories of works of art (books, films, music, etc.'''
     name = models.CharField(
         max_length=256,
-        verbose_name='Название категории',
-        help_text='Категория произведений'
+        verbose_name='Name of Category',
+        help_text='Category of works'
     )
     slug = models.SlugField(
         unique=True, max_length=50,
         verbose_name='Slug',
-        help_text='Категория произведений'
+        help_text='Category of works'
     )
 
     class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
 
     def __str__(self):
         return self.name
 
 
 class Genre(models.Model):
-    '''Жанры произведений'''
+    '''Genres of works'''
     name = models.CharField(
         max_length=256,
-        verbose_name='Название жанра',
-        help_text='Жанр произведения')
+        verbose_name='Name of Genre',
+        help_text='Genre of Works')
     slug = models.SlugField(
         unique=True, max_length=50,
-        help_text='Жанр произведения',
+        help_text='Genre of Works',
         verbose_name='Slug'
     )
 
     class Meta:
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
+        verbose_name = 'Genre'
+        verbose_name_plural = 'Genres'
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    '''Произведения'''
+    '''Genres'''
     name = models.CharField(
         max_length=256,
-        verbose_name='Название',
-        help_text='Название произведения')
+        verbose_name='Name',
+        help_text='Name of work')
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
-        verbose_name='Жанры',
-        help_text='Жанры произведения'
+        verbose_name='Genre',
+        help_text='Genres of works'
     )
     category = models.ForeignKey(
         Category,
@@ -133,24 +134,24 @@ class Title(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Категория',
-        help_text='Категория произведения',
+        verbose_name='Category',
+        help_text='Category of work',
     )
     description = models.TextField(
         max_length=510,
         blank=True,
-        verbose_name='Описание',
-        help_text='Описание произведения'
+        verbose_name='Description',
+        help_text='Description of work'
     )
     year = models.IntegerField(
-        verbose_name='Год выхода',
-        help_text='Год выхода произведения',
+        verbose_name='Release year',
+        help_text='Release year of work',
         validators=[validate_year]
     )
 
     class Meta:
-        verbose_name = 'Произведение'
-        verbose_name_plural = 'Произведения'
+        verbose_name = 'Work'
+        verbose_name_plural = 'Works'
 
     def __str__(self):
         return self.name
