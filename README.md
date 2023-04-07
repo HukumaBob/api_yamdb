@@ -1,91 +1,89 @@
 
-## Описание проекта YaMDb
-Проект YaMDb собирает отзывы пользователей на произведения. 
-Произведения делятся на категории: «Книги», «Фильмы», «Музыка». 
-Список категорий может быть расширен администратором (например, 
-можно добавить категорию «Изобразительное искусство» или «Ювелирка»).
+## Description of the YaMDb project
+The YaMDb project collects user feedback on works.
+Produced by categories: "Books", "Films", "Music".
+The list of categories can be extended by the administrator (for example,
+you can add Fine Art or Jewelery changes).
 
-Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или 
-послушать музыку.
+The works themselves are not found in YaMDb, you cannot watch the movie or
+listen to music.
+In each category there are works: books, films or music. For example,
+in the category "Books" there can be works "Winnie the Pooh and all-all-all" and
+"Martian Chronicles", and in the category "Music" - the song "Davecha" of the group
+"Insects" and Bach's second suite.
 
-В каждой категории есть произведения: книги, фильмы или музыка. Например, 
-в категории «Книги» могут быть произведения «Винни-Пух и все-все-все» и 
-«Марсианские хроники», а в категории «Музыка» — песня «Давеча» группы 
-«Насекомые» и вторая сюита Баха.
+A work can be assigned a genre from the list of preset
+(for example, "Fairy Tale", "Rock" or "Arthouse"). New genres can only be created
+administrator.
 
-Произведению может быть присвоен жанр из списка предустановленных 
-(например, «Сказка», «Рок» или «Артхаус»). Новые жанры может создавать только 
-администратор.
+Grateful or indignant users leave text messages for the works
+reviews and rate the product in the range from one to ten
+(integer); an average rating is formed from user ratings
+works - rating. For one work, the user can
+leave only one review.
 
-Благодарные или возмущённые пользователи оставляют к произведениям текстовые 
-отзывы и ставят произведению оценку в диапазоне от одного до десяти 
-(целое число); из пользовательских оценок формируется усреднённая оценка 
-произведения — рейтинг. На одно произведение пользователь может 
-оставить только один отзыв.
+### User registration algorithm
+1. The user sends a POST request to add a new user with
+email and username parameters to the /api/v1/auth/signup/ endpoint.
+2. YaMDB sends an email with a confirmation code (confirmation_code) to the email address.
+3. The user sends a POST request with the parameters username and
+confirmation_code to the /api/v1/auth/token/ endpoint, in response to a request to it
+comes token (JWT token). As a result, the user receives a token and can
+work with the project's API by sending this token with each request.
+4. To re-receive a letter with a confirmation code, the user sends
+POST request with username and email parameters to the /api/v1/auth/remind/ endpoint.
+5. Optionally, the user sends a PATCH request to the endpoint
+/api/v1/users/me/ and fill in the fields in your profile.
+6. If the user is created by an administrator, for example, via a POST request to
+endpoint api/v1/users/ - a letter with a code also comes to his mail.
 
-### Алгоритм регистрации пользователей
-1. Пользователь отправляет POST-запрос на добавление нового пользователя с 
-параметрами email и username на эндпоинт /api/v1/auth/signup/.
-2. YaMDB отправляет письмо с кодом подтверждения (confirmation_code) на адрес email.
-3. Пользователь отправляет POST-запрос с параметрами username и 
-confirmation_code на эндпоинт /api/v1/auth/token/, в ответе на запрос ему 
-приходит token (JWT-токен). В результате пользователь получает токен и может 
-работать с API проекта, отправляя этот токен с каждым запросом.
-4. Для повторного получения письма с кодом подтверждения пользователь отправляет
-POST-запрос с параметрами username и email на эндпоинт /api/v1/auth/remind/.
-5. При желании пользователь отправляет PATCH-запрос на эндпоинт 
-/api/v1/users/me/ и заполняет поля в своём профайле.
-6. Если пользователя создаёт администратор, например, через POST-запрос на 
-эндпоинт api/v1/users/ — письмо с кодом также приходит к нему на почту.
+### Custom roles
+- **Anonymous** - can view descriptions of works, read reviews and comments.
+- **Authenticated user (user)** - can, like **Anonymous**, read everything,
+in addition, he can publish reviews and rate works
+(movies / books / songs), can comment on other people's reviews; can edit
+and delete your reviews and comments. This role is assigned by default.
+for every new user.
+- **Moderator** - same rights as **Authenticated**
+user plus the right to remove any reviews and comments.
+- **Administrator (admin)** — full rights to manage all project content.
+Can create and delete works, categories and genres. Can prescribe
+user roles.
+- **Django Superuser** - has administrator rights (admin). Even
+change the user role of the superuser - this will not deprive him of administrative rights.
+A superuser is always an administrator, but an administrator is not necessarily a superuser.
 
-### Пользовательские роли
-- **Аноним** — может просматривать описания произведений, читать отзывы и комментарии.
-- **Аутентифицированный пользователь (user)** — может, как и **Аноним**, читать всё, 
-дополнительно он может публиковать отзывы и ставить оценку произведениям 
-(фильмам/книгам/песенкам), может комментировать чужие отзывы; может редактировать 
-и удалять свои отзывы и комментарии. Эта роль присваивается по умолчанию 
-каждому новому пользователю.
-- **Модератор (moderator)** — те же права, что и у **Аутентифицированного** 
-пользователя плюс право удалять любые отзывы и комментарии.
-- **Администратор (admin)** — полные права на управление всем контентом проекта. 
-Может создавать и удалять произведения, категории и жанры. Может назначать 
-роли пользователям.
-- **Суперюзер Django** — обладает правами администратора (admin). Даже если 
-изменить пользовательскую роль суперюзера — это не лишит его прав администратора. 
-Суперюзер — всегда администратор, но администратор — не обязательно суперюзер.
+### YaMDb API resources
+- Resource **auth**: authentication.
+- Resource **users**: users.
+- Resource **titles**: works to which they write reviews (a certain movie, book or song).
+- Resource **categories**: categories (types) of works ("Films", "Books", "Music"). One work can only be assigned to one category.
+- Resource **genres**: genres of works. One work can be tied to several genres.
+- Resource **reviews**: reviews of works. The review is tied to a specific product.
+- Resource **comments**: comments on reviews. The comment is tied to a specific review.
 
-### Ресурсы API YaMDb
-- Ресурс **auth**: аутентификация.
-- Ресурс **users**: пользователи.
-- Ресурс **titles**: произведения, к которым пишут отзывы (определённый фильм, книга или песенка).
-- Ресурс **categories**: категории (типы) произведений («Фильмы», «Книги», «Музыка»). Одно произведение может быть привязано только к одной категории.
-- Ресурс **genres**: жанры произведений. Одно произведение может быть привязано к нескольким жанрам.
-- Ресурс **reviews**: отзывы на произведения. Отзыв привязан к определённому произведению.
-- Ресурс **comments**: комментарии к отзывам. Комментарий привязан к определённому отзыву.
+## Launch of the project
 
-
-## Запуск проекта
-
-- Установить и активировать виртуальное окружение
-- Установить зависимости из файла requirements.txt
+- Install and activate the virtual environment
+- Install dependencies from requirements.txt file
 ```
 python -m pip install --upgrade pip
 
 pip install -r requirements.txt
 ```
-- Выполнить миграции:
+- Run migrations:
 ```
 python manage.py migrate
 ```
 
-- В папке с файлом manage.py выполнить команду:
+- In the folder with the manage.py file, run the command:
 ```
 python manage.py runserver
 ```
 
-## Management-команда, добавляющая данные в БД через Django ORM
+## Management command that adds data to the database via Django ORM
 
-- В папке с файлом manage.py выполнить команду:
+- In the folder with the manage.py file, run the command:
 ```
 python manage.py convert_csv
 ```
