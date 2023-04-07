@@ -1,9 +1,9 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from django.utils import timezone
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,8 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
                 'Incorrect username')
         return username
 
+
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
     role = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -34,6 +36,7 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Incorrect username')
         return username
+
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:

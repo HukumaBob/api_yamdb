@@ -1,19 +1,23 @@
 from django.core.mail import send_mail
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import (FilterSet,
                                            CharFilter)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   DestroyModelMixin)
+from rest_framework.pagination import (PageNumberPagination,
+                                       LimitOffsetPagination)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permissions import IsAdminOrStuffPermission, IsAuthorOrStuff, IsAdminOrReadOnly, IsAdminRole, ReadOnly
+from .permissions import (IsAdminOrStuffPermission, IsAuthorOrStuff,
+                          IsAdminOrReadOnly, IsAdminRole, ReadOnly)
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
                          ReviewSerializer, CommentSerializer, GenreSerializer,
-                         CategorySerializer, TitleSerializer, TitleCreateSerializer, UserWithoutRoleSerializer)
+                         CategorySerializer, TitleSerializer,
+                         TitleCreateSerializer, UserWithoutRoleSerializer)
 from rest_framework.response import Response
 from api_yamdb.settings import EMAIL_ADMIN
 import uuid
