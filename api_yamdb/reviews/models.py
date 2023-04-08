@@ -42,37 +42,17 @@ class User(AbstractUser):
         default='00000000'
     )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_username_email'
-            )
-        ]
-
     @property
     def is_moderator(self):
-        if self.role == self.ROLE_MODERATOR:
-            return True
-        else:
-            return False
+        return self.role == self.ROLE_MODERATOR
 
     @property
     def is_user(self):
-        if self.role == self.ROLE_USER:
-            return True
-        else:
-            return False
+        return self.role == self.ROLE_USER
 
     @property
     def is_admin(self):
-        if self.role == self.ROLE_ADMIN:
-            return True
-        else:
-            return False
-
-
-User = get_user_model()
+        return self.role == self.ROLE_ADMIN
 
 
 class Category(models.Model):

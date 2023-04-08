@@ -1,6 +1,4 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
@@ -14,11 +12,11 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role',
         )
 
-    def validate(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Incorrect username')
-        return username
+    # def validate(self, username):
+    #     if username == 'me':
+    #         raise serializers.ValidationError(
+    #             'Incorrect username')
+    #     return username
 
 
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
@@ -82,13 +80,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Score the title from 1 to 10!'
-            )
-        return value
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -127,17 +118,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description', 'genre', 'category'
         )
 
-    def validate_year(self, value):
-        current_year = timezone.now().year
-        if not 0 <= value <= current_year:
-            raise serializers.ValidationError(
-                'Проверьте год создания произведения (должен быть нашей эры).'
-            )
-        return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField()
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
 
@@ -147,8 +130,4 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
 
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        if not rating:
-            return rating
-        return round(rating, 1)
+

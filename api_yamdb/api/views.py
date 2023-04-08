@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.rest_framework import (FilterSet,
@@ -12,14 +13,14 @@ from rest_framework.pagination import (PageNumberPagination,
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
-from .permissions import (IsAdminOrStuffPermission, IsAuthorOrStuff,
+from .permissions import (IsAdminOrStuffPermission, IsAuthorOrModerator,
                           IsAdminOrReadOnly, IsAdminRole, ReadOnly)
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
                          ReviewSerializer, CommentSerializer, GenreSerializer,
                          CategorySerializer, TitleSerializer,
                          TitleCreateSerializer, UserWithoutRoleSerializer)
 from rest_framework.response import Response
-from api_yamdb.settings import EMAIL_ADMIN
+from django.conf import settings
 import uuid
 
 
@@ -27,7 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ['username', ]
+    search_fields = ('username', )
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrStuffPermission]
     lookup_field = 'username'
@@ -39,7 +40,6 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
         url_path='me')
     def change_me(self, request):
-        serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
             serializer = UserWithoutRoleSerializer(
                 request.user, data=request.data, partial=True
@@ -47,6 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -59,7 +60,7 @@ def confirmation_code_to_email(username):
     send_mail(
         subject,
         message,
-        EMAIL_ADMIN,
+        settings.EMAIL_ADMIN,
         [user.email],
     )
     user.save()
@@ -112,7 +113,7 @@ def get_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrStuff,)
+    permission_classes = (IsAuthorOrModerator,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -128,7 +129,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrStuff,)
+    permission_classes = (IsAuthorOrModerator,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -161,7 +162,9 @@ class TitleFilter(FilterSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminRole | ReadOnly,)
     filter_backends = [DjangoFilterBackend]
