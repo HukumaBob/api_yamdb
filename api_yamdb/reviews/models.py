@@ -1,9 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator,
+                                    MinValueValidator)
 from django.db import models
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
-from .validators import validate_year
+
+from .validators import validate_username, validate_year
 
 
 class User(AbstractUser):
@@ -15,9 +15,8 @@ class User(AbstractUser):
         (ROLE_MODERATOR, 'Moderator'),
         (ROLE_ADMIN, 'Admin'),
     )
-    VALIDATOR = RegexValidator(r'^[\w.@+-]+\Z')
     username = models.CharField(
-        validators=[VALIDATOR],
+        validators=(validate_username,),
         max_length=150,
         unique=True
     )
@@ -42,37 +41,17 @@ class User(AbstractUser):
         default='00000000'
     )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_username_email'
-            )
-        ]
-
     @property
     def is_moderator(self):
-        if self.role == self.ROLE_MODERATOR:
-            return True
-        else:
-            return False
+        return self.role == self.ROLE_MODERATOR
 
     @property
     def is_user(self):
-        if self.role == self.ROLE_USER:
-            return True
-        else:
-            return False
+        return self.role == self.ROLE_USER
 
     @property
     def is_admin(self):
-        if self.role == self.ROLE_ADMIN:
-            return True
-        else:
-            return False
-
-
-User = get_user_model()
+        return self.role == self.ROLE_ADMIN
 
 
 class Category(models.Model):

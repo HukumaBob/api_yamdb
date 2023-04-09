@@ -1,9 +1,8 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,12 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role',
         )
-
-    def validate(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Incorrect username')
-        return username
 
 
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
@@ -31,22 +24,30 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role',
         )
 
-    def validate(self, username):
-        if username == 'me':
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username, ]
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
+            return data
+        if (User.objects.filter(username=data['username']).exists()
+                or User.objects.filter(email=data['email']).exists()):
             raise serializers.ValidationError(
-                'Incorrect username')
-        return username
-
-
-class SignUpSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+                'This user already exist!'
+            )
+        return data
 
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=50)
+    confirmation_code = serializers.CharField(max_length=254)
 
 
 class CurrentTitleDefault(object):
@@ -81,13 +82,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message='You have already reviewed it!'
             )
         ]
-
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Score the title from 1 to 10!'
-            )
-        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -127,17 +121,9 @@ class TitleCreateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description', 'genre', 'category'
         )
 
-    def validate_year(self, value):
-        current_year = timezone.now().year
-        if not 0 <= value <= current_year:
-            raise serializers.ValidationError(
-                'Проверьте год создания произведения (должен быть нашей эры).'
-            )
-        return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField()
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
 
@@ -146,9 +132,3 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        if not rating:
-            return rating
-        return round(rating, 1)
