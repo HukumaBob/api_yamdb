@@ -41,7 +41,7 @@ class SignUpSerializer(serializers.Serializer):
         if (User.objects.filter(username=data['username']).exists()
                 or User.objects.filter(email=data['email']).exists()):
             raise serializers.ValidationError(
-                'Пользователь с такими данными уже существует!'
+                'This user already exist!'
             )
         return data
 
