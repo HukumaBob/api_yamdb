@@ -1,18 +1,15 @@
-from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters.rest_framework import (FilterSet,
-                                           CharFilter)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   DestroyModelMixin)
 from rest_framework.pagination import (PageNumberPagination,
                                        LimitOffsetPagination)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
+from .helpers import confirmation_code_to_email
+from .mixins import CommonCreateListDestroyViewset
 from .permissions import (IsAdminOrStuffPermission, IsAuthorOrModerator,
                           IsAdminOrReadOnly, IsAdminRole, ReadOnly)
 from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
@@ -20,15 +17,14 @@ from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
                          CategorySerializer, TitleSerializer,
                          TitleCreateSerializer, UserWithoutRoleSerializer)
 from rest_framework.response import Response
-from django.conf import settings
-import uuid
+from .filters import TitleFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('username', )
+    search_fields = ('username',)
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrStuffPermission]
     lookup_field = 'username'
@@ -51,21 +47,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def confirmation_code_to_email(username):
-    user = get_object_or_404(User, username=username)
-    confirmation_code = str(uuid.uuid4())
-    user.confirmation_code = confirmation_code
-    subject = 'YAMDb registration'
-    message = f'You confirmation code {user.confirmation_code}'
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL_ADMIN,
-        [user.email],
-    )
-    user.save()
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_confirmation_code(request):
@@ -73,13 +54,10 @@ def get_confirmation_code(request):
     if not User.objects.filter(username=username).exists():
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data['username'] != 'me':
-            serializer.save()
-            confirmation_code_to_email(username)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(
-            'Wrong username', status=status.HTTP_400_BAD_REQUEST
-        )
+        serializer.save()
+        confirmation_code_to_email(username)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     user = get_object_or_404(User, username=username)
     serializer = SignUpSerializer(
         user, data=request.data, partial=True
@@ -141,24 +119,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, id=title_id)
         serializer.save(author=self.request.user, title=title)
-
-
-class CommonCreateListDestroyViewset(
-    CreateModelMixin,
-    ListModelMixin,
-    DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
-
-
-class TitleFilter(FilterSet):
-    category = CharFilter(field_name='category__slug')
-    genre = CharFilter(field_name='genre__slug')
-
-    class Meta:
-        model = Title
-        fields = ['genre', 'category', 'name', 'year']
 
 
 class TitleViewSet(viewsets.ModelViewSet):

@@ -12,12 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name', 'bio', 'role',
         )
 
-    # def validate(self, username):
-    #     if username == 'me':
-    #         raise serializers.ValidationError(
-    #             'Incorrect username')
-    #     return username
-
 
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
     role = serializers.StringRelatedField(read_only=True)
@@ -28,12 +22,6 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role',
         )
-
-    def validate(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Incorrect username')
-        return username
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -129,5 +117,3 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-
-
