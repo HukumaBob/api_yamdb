@@ -52,7 +52,6 @@ class UserViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def get_confirmation_code(request):
     serializer = SignUpSerializer(data=request.data)
-
     serializer.is_valid(raise_exception=True)
     username = serializer.data.get('username')
     email = serializer.data.get('email')

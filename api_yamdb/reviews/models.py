@@ -1,8 +1,9 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator,
+                                    MinValueValidator)
 from django.db import models
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
-from .validators import validate_year, validate_username
+
+from .validators import validate_username, validate_year
 
 
 class User(AbstractUser):
@@ -14,9 +15,8 @@ class User(AbstractUser):
         (ROLE_MODERATOR, 'Moderator'),
         (ROLE_ADMIN, 'Admin'),
     )
-    VALIDATOR = RegexValidator(r'^[\w.@+-]+\Z')
     username = models.CharField(
-        validators=(validate_username, VALIDATOR),
+        validators=(validate_username,),
         max_length=150,
         unique=True
     )

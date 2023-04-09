@@ -2,7 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
-
 from reviews.validators import validate_username
 
 
@@ -48,7 +47,7 @@ class SignUpSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=50)
+    confirmation_code = serializers.CharField(max_length=254)
 
 
 class CurrentTitleDefault(object):

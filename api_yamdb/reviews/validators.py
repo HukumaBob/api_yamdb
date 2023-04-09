@@ -16,6 +16,7 @@ def validate_username(value):
         )
     return value
 
+
 def validate_year(year):
     this_year = datetime.date.today().year
     if year > this_year:
