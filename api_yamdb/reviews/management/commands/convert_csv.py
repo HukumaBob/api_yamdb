@@ -33,7 +33,5 @@ class Command(BaseCommand):
                     obj, created = model.objects.get_or_create(**data)
                     if created:
                         logging.info(self.style.SUCCESS(f"Created {obj}"))
-                        print(self.style.SUCCESS(f"Created {obj}"))
                     else:
                         logging.info(f"{obj} already exists")
-                        print(f"{obj} already exists")
