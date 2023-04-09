@@ -17,6 +17,7 @@ from .serializer import (UserSerializer, SignUpSerializer, TokenSerializer,
                          CategorySerializer, TitleSerializer,
                          TitleCreateSerializer, UserWithoutRoleSerializer)
 from rest_framework.response import Response
+
 from .filters import TitleFilter
 
 
@@ -50,26 +51,17 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_confirmation_code(request):
-    username = request.data.get('username')
-    if not User.objects.filter(username=username).exists():
-        serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        confirmation_code_to_email(username)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = SignUpSerializer(data=request.data)
 
-    user = get_object_or_404(User, username=username)
-    serializer = SignUpSerializer(
-        user, data=request.data, partial=True
-    )
     serializer.is_valid(raise_exception=True)
-    if serializer.validated_data['email'] == user.email:
-        serializer.save()
-        confirmation_code_to_email(username)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(
-        'Wrong email address', status=status.HTTP_400_BAD_REQUEST
+    username = serializer.data.get('username')
+    email = serializer.data.get('email')
+    user, created = User.objects.get_or_create(
+        username=username,
+        email=email
     )
+    confirmation_code_to_email(username)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

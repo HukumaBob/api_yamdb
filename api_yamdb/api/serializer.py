@@ -3,6 +3,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
+from reviews.validators import validate_username
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,10 +26,24 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
         )
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username, ]
+    )
+    email = serializers.EmailField(required=True, max_length=254)
+
+    def validate(self, data):
+        if User.objects.filter(username=data['username'],
+                               email=data['email']).exists():
+            return data
+        if (User.objects.filter(username=data['username']).exists()
+                or User.objects.filter(email=data['email']).exists()):
+            raise serializers.ValidationError(
+                'Пользователь с такими данными уже существует!'
+            )
+        return data
 
 
 class TokenSerializer(serializers.Serializer):
