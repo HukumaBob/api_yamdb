@@ -1,6 +1,7 @@
 from csv import DictReader
 from django.core.management.base import BaseCommand
 from reviews.models import Category, Comment, Genre, Review, Title, User
+import logging
 
 ALREADY_LOADED_ERROR_MESSAGE = """
 If you need to reload the child data from the CSV file,
@@ -27,10 +28,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         for model, csv in TABLES.items():
             with open(f"./static/data/{csv}", encoding="utf-8") as file:
-                if model.objects.exists():
-                    print(f"{model} data already loaded...exiting.")
-                    print(ALREADY_LOADED_ERROR_MESSAGE)
-                    continue
                 reader = DictReader(file)
-                model.objects.bulk_create(model(**data) for data in reader)
-            self.stdout.write(self.style.SUCCESS("Data uploaded successfully"))
+                for data in reader:
+                    obj, created = model.objects.get_or_create(**data)
+                    if created:
+                        logging.info(self.style.SUCCESS(f"Created {obj}"))
+                        print(self.style.SUCCESS(f"Created {obj}"))
+                    else:
+                        logging.info(f"{obj} already exists")
+                        print(f"{obj} already exists")
