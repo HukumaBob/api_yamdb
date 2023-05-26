@@ -21,6 +21,8 @@ from rest_framework.response import Response
 from .filters import TitleFilter
 
 
+# UserViewSet
+# This viewset handles operations related to User model, including CRUD operations and 'me' endpoint.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -38,6 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me')
     def change_me(self, request):
         if request.method == 'PATCH':
+            # Serialize the request user with UserWithoutRoleSerializer
             serializer = UserWithoutRoleSerializer(
                 request.user, data=request.data, partial=True
             )
@@ -51,6 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_confirmation_code(request):
+    # Serialize the request data with SignUpSerializer
     serializer = SignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.data.get('username')
@@ -66,12 +70,14 @@ def get_confirmation_code(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_token(request):
+    # Serialize the request data with TokenSerializer
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
     confirmation_code = serializer.validated_data.get('confirmation_code')
     user = get_object_or_404(User, username=username)
     if user.confirmation_code == confirmation_code:
+        # Generate a token using RefreshToken for the user
         token = RefreshToken.for_user(user)
         token_data = {'token': str(token.access_token)}
         return Response(token_data, status=status.HTTP_200_OK)
@@ -80,6 +86,8 @@ def get_token(request):
     )
 
 
+# CommentViewSet
+# This viewset handles operations related to Comment model, including CRUD operations.
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorOrModerator,)
@@ -96,6 +104,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
+# ReviewViewSet
+# This viewset handles operations related to Review model, including CRUD operations.
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrModerator,)
@@ -112,6 +122,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
+# TitleViewSet
+# This viewset handles operations related to Title model, including CRUD operations.
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
@@ -128,6 +140,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
 
+# CategoryViewSet
+# This viewset handles operations related to Category model, including CRUD operations.
 class CategoryViewSet(CommonCreateListDestroyViewset):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -138,6 +152,8 @@ class CategoryViewSet(CommonCreateListDestroyViewset):
     pagination_class = LimitOffsetPagination
 
 
+# GenreViewSet
+# This viewset handles operations related to Genre model, including CRUD operations.
 class GenreViewSet(CommonCreateListDestroyViewset):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer

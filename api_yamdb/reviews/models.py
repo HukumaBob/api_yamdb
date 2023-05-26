@@ -1,12 +1,19 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator,
-                                    MinValueValidator)
+from django.core.validators import (MaxValueValidator, MinValueValidator)
 from django.db import models
 
 from .validators import validate_username, validate_year
 
 
 class User(AbstractUser):
+    """
+    Custom user model extending Django's AbstractUser.
+    Represents a user of the application.
+    Inherits fields like username, email, password from AbstractUser.
+    Adds additional fields: role, bio, confirmation_code.
+    Provides properties to check user roles: is_moderator, is_user, is_admin.
+    """
+
     ROLE_USER = 'user'
     ROLE_MODERATOR = 'moderator'
     ROLE_ADMIN = 'admin'
@@ -15,6 +22,7 @@ class User(AbstractUser):
         (ROLE_MODERATOR, 'Moderator'),
         (ROLE_ADMIN, 'Admin'),
     )
+
     username = models.CharField(
         validators=(validate_username,),
         max_length=150,
@@ -55,14 +63,18 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    '''Categories of works of art (books, films, music, etc.'''
+    """
+    Categories of works of art (books, films, music, etc.).
+    """
+
     name = models.CharField(
         max_length=256,
         verbose_name='Name of Category',
         help_text='Category of works'
     )
     slug = models.SlugField(
-        unique=True, max_length=50,
+        unique=True,
+        max_length=50,
         verbose_name='Slug',
         help_text='Category of works'
     )
@@ -76,13 +88,18 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    '''Genres of works'''
+    """
+    Genres of works.
+    """
+
     name = models.CharField(
         max_length=256,
         verbose_name='Name of Genre',
-        help_text='Genre of Works')
+        help_text='Genre of Works'
+    )
     slug = models.SlugField(
-        unique=True, max_length=50,
+        unique=True,
+        max_length=50,
         help_text='Genre of Works',
         verbose_name='Slug'
     )
@@ -96,11 +113,15 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    '''Genres'''
+    """
+    Genres.
+    """
+
     name = models.CharField(
         max_length=256,
         verbose_name='Name',
-        help_text='Name of work')
+        help_text='Name of work'
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
@@ -114,7 +135,7 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         related_name='titles',
         verbose_name='Category',
-        help_text='Category of work',
+        help_text='Category of work'
     )
     description = models.TextField(
         max_length=510,
@@ -137,6 +158,10 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """
+    Represents a review of a work.
+    """
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -153,8 +178,7 @@ class Review(models.Model):
         verbose_name='Author'
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)],
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
         verbose_name='Score'
     )
     pub_date = models.DateTimeField(
@@ -173,6 +197,10 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """
+    Represents a comment on a review.
+    """
+
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
