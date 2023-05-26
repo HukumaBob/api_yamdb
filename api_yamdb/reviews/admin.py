@@ -1,10 +1,11 @@
 from django.contrib import admin
-
 from .models import Category, Comment, Genre, Review, Title, User
 
+# Customize the site header
 admin.site.site_header = 'Site administration YaMDb'
 
 
+# Define custom admin models for User, Title, Category, Genre, Review, and Comment
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
@@ -58,18 +59,17 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 class ReviewAdmin(admin.ModelAdmin):
-    class ReviewAdmin(admin.ModelAdmin):
-        list_display = (
-            'pk',
-            'author',
-            'text',
-            'score',
-            'pub_date',
-            'title'
-        )
-        empty_value_display = 'no value'
-        list_filter = ('author', 'score', 'pub_date')
-        search_fields = ('author',)
+    list_display = (
+        'pk',
+        'author',
+        'text',
+        'score',
+        'pub_date',
+        'title'
+    )
+    empty_value_display = 'no value'
+    list_filter = ('author', 'score', 'pub_date')
+    search_fields = ('author',)
 
 
 class CommentAdmin(admin.ModelAdmin):
@@ -85,6 +85,7 @@ class CommentAdmin(admin.ModelAdmin):
     search_fields = ('author',)
 
 
+# Register the custom admin models for User, Title, Category, Genre, Review, and Comment
 admin.site.register(User, UserAdmin)
 admin.site.register(Title, TitleAdmin)
 admin.site.register(Category, CategoryAdmin)

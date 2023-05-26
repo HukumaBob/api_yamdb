@@ -6,6 +6,8 @@ from reviews.validators import validate_username
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # Serializer for User model
+
     class Meta:
         model = User
         fields = (
@@ -15,6 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserWithoutRoleSerializer(serializers.ModelSerializer):
+    # Serializer for User model excluding the 'role' field
     role = serializers.StringRelatedField(read_only=True)
 
     class Meta:
@@ -26,6 +29,8 @@ class UserWithoutRoleSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.Serializer):
+    # Serializer for user sign up
+
     username = serializers.CharField(
         required=True,
         max_length=150,
@@ -34,24 +39,30 @@ class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, max_length=254)
 
     def validate(self, data):
+        # Custom validation to check if the username or email already exist
         if User.objects.filter(username=data['username'],
                                email=data['email']).exists():
             return data
         if (User.objects.filter(username=data['username']).exists()
                 or User.objects.filter(email=data['email']).exists()):
             raise serializers.ValidationError(
-                'This user already exist!'
+                'This user already exists!'
             )
         return data
 
 
 class TokenSerializer(serializers.Serializer):
+    # Serializer for authentication token
+
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=254)
 
 
 class CurrentTitleDefault(object):
+    # Default value for the 'title' field based on the URL context
+
     def set_context(self, serializer_field):
+        # Set the 'title' object based on the URL context
         title_id = serializer_field.context.get('view').kwargs.get('title_id')
         self.title = get_object_or_404(
             Title,
@@ -59,10 +70,13 @@ class CurrentTitleDefault(object):
         )
 
     def __call__(self):
+        # Return the 'title' object as the default value
         return self.title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    # Serializer for Review model
+
     author = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all(),
@@ -73,8 +87,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
         model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(),
@@ -85,29 +99,37 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    # Serializer for Comment model
+
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    # Serializer for Category model
+
     class Meta:
-        fields = ['name', 'slug']
         model = Category
+        fields = ['name', 'slug']
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    # Serializer for Genre model
+
     class Meta:
-        fields = ['name', 'slug']
         model = Genre
+        fields = ['name', 'slug']
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
+    # Serializer for creating Title model
+
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all(),
     )
@@ -123,6 +145,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    # Serializer for Title model
+
     rating = serializers.IntegerField()
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
